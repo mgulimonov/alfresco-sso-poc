@@ -2,16 +2,12 @@ package com.max.alfboot.config;
 
 import com.max.alfboot.alfresco.AlfrescoAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.sql.DataSource;
 
@@ -25,20 +21,27 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private AlfrescoAuthenticationProvider alfrescoAuthenticationProvider;
 
+    @Value("${alfresco.sso}")
+    private String ssoPage;
+
+    @Value("${alfresco.logout}")
+    private String logoutUrl;
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()
                 .rememberMe().and()
                 .authorizeRequests()
-                .antMatchers("/", "/home", "/auth", "/autologin").permitAll()
+                .antMatchers("/", "/home", "/auth", "/autologin", "/logout").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
-                .loginPage("/login")
+                .loginPage(ssoPage)
                 .permitAll()
                 .and()
                 .logout()
+                .logoutSuccessUrl(logoutUrl)
                 .permitAll();
     }
 
